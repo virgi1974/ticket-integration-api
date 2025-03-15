@@ -1,3 +1,10 @@
+# Purpose: Handles communication with the external provider API
+# Responsibilities:
+# - Makes HTTP requests to fetch event data
+# - Handles network errors
+# - Wraps responses in our domain objects
+# - Returns Success/Failure results
+
 module Domain
   module Provider
     module Services

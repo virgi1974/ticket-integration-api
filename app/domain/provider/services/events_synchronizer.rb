@@ -1,3 +1,10 @@
+# Purpose: Orchestrates the entire event synchronization process
+# Responsibilities:
+# - Coordinates the fetch, parse, and persist operations
+# - Manages the flow of data between components
+# - Handles the result chain
+# - Provides a single entry point for sync operation
+
 module Domain
   module Provider
     module Services

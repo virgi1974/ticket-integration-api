@@ -1,3 +1,11 @@
+# Purpose: Transforms XML response into domain data structure
+# Responsibilities:
+# - Parses XML data
+# - Validates data structure
+# - Handles parsing errors
+# - Converts types (integers, decimals, booleans)
+# - Returns Success/Failure results
+
 module Domain
   module Provider
     module Parsers

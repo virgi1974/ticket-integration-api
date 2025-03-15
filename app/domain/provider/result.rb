@@ -1,3 +1,10 @@
+# Purpose: Provides Result monad pattern functionality
+# Responsibilities:
+# - Includes dry-monads Result and Try
+# - Adds pattern matching capability
+# - Standardizes Success/Failure handling
+# - Enables functional composition
+
 module Domain
   module Provider
     module Result

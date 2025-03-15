@@ -1,3 +1,11 @@
+# Purpose: Manages persistence of event data to our database
+# Responsibilities:
+# - Handles database transactions
+# - Creates/updates events, slots, and zones
+# - Manages UUID generation
+# - Ensures data consistency
+# - Returns Success/Failure results
+
 module Domain
   module Provider
     module Services

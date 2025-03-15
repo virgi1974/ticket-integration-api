@@ -1,3 +1,10 @@
+# Purpose: Value object for HTTP responses
+# Responsibilities:
+# - Encapsulates HTTP response data
+# - Provides type safety through dry-struct
+# - Offers helper methods for response state
+# - Immutable data structure
+
 module Domain
   module Provider
     class Response < Dry::Struct

@@ -1,3 +1,11 @@
+# Purpose: Configures and manages HTTP connections
+# Responsibilities:
+# - Configures Faraday connection
+# - Manages retry logic
+# - Sets timeouts
+# - Provides singleton instance
+# - Handles connection lifecycle
+
 module Domain
   module Provider
     class HttpClient
