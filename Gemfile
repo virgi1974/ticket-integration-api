@@ -38,9 +38,13 @@ group :development, :test do
 
   # Test data generation
   gem "factory_bot_rails", "~> 6.4"
-  # Testing framework
-  gem "rspec-rails", "~> 7.1"
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+
+  # Testing framework
+  gem "rspec-rails", "~> 7.1"
+
+  # Test matchers for models
+  gem "shoulda-matchers", "~> 5.3"
 end
