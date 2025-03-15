@@ -5,6 +5,7 @@
 # - Standardizes Success/Failure handling
 # - Enables functional composition
 
+require "dry/matcher/result_matcher"
 
 module Provider
   module Result

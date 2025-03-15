@@ -28,8 +28,8 @@ module Provider
 
       def call
         fetch_data
-          .and_then { |response| parse_data(response) }
-          .and_then { |data| persist_data(data) }
+          .bind { |response| parse_data(response) }
+          .bind { |data| persist_data(data) }
       end
 
       private
