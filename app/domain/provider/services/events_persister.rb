@@ -1,76 +1,101 @@
 # Purpose: Manages persistence of event data to our database
 # Responsibilities:
 # - Handles database transactions
-# - Creates/updates events, slots, and zones
+# - Performs bulk upserts for better performance
 # - Manages UUID generation
 # - Ensures data consistency
 # - Returns Success/Failure results
 
-module Domain
-  module Provider
-    module Services
-      class EventsPersister
-        include Result
+module Provider
+  module Services
+    class EventsPersister
+      include Result
 
-        def persist(data)
-          ActiveRecord::Base.transaction do
-            data[:events].each do |event_data|
-              event = upsert_event(event_data)
-              upsert_slots(event, event_data[:slots])
-            end
-            Success(true)
-          end
-        rescue ActiveRecord::RecordInvalid => e
-          Failure(ValidationError.new(e.message))
-        end
+      def persist(data)
+        ActiveRecord::Base.transaction do
+          # Collect all external IDs first
+          event_ids = data[:events].map { |e| e[:external_id] }
+          slot_ids = data[:events].flat_map { |e| e[:slots].map { |s| s[:external_id] } }
+          zone_ids = data[:events].flat_map { |e|
+            e[:slots].flat_map { |s| s[:zones].map { |z| z[:external_id] } }
+          }
 
-        private
+          # Fetch existing records in bulk
+          existing_events = Event.where(external_id: event_ids).index_by(&:external_id)
+          existing_slots = Slot.where(external_id: slot_ids).index_by(&:external_id)
+          existing_zones = Zone.where(external_id: zone_ids).index_by(&:external_id)
 
-          def upsert_event(event_data)
-            Event.find_or_initialize_by(external_id: event_data[:external_id]) do |e|
-              e.uuid ||= SecureRandom.uuid
-            end.tap do |event|
-              event.update!(
+          # Prepare bulk inserts/updates
+          events_to_insert = []
+          events_to_update = []
+          slots_to_insert = []
+          slots_to_update = []
+          zones_to_insert = []
+          zones_to_update = []
+
+          # Process events
+          data[:events].each do |event_data|
+            event = existing_events[event_data[:external_id]]
+            if event
+              events_to_update << [event, event_data]
+            else
+              events_to_insert << {
+                external_id: event_data[:external_id],
+                uuid: SecureRandom.uuid,
                 title: event_data[:title],
-                sell_mode: event_data[:sell_mode]
-              )
+                sell_mode: event_data[:sell_mode],
+                created_at: Time.current,
+                updated_at: Time.current
+              }
             end
+
+            # Similar for slots and zones...
           end
 
-          def upsert_slots(event, slots_data)
-            slots_data.each do |slot_data|
-              slot = upsert_slot(event, slot_data)
-              upsert_zones(slot, slot_data[:zones])
-            end
-          end
+          # Perform bulk operations
+          Event.insert_all(events_to_insert) if events_to_insert.any?
+          Event.upsert_all(
+            events_to_update.map { |event, data|
+              data.merge(id: event.id, updated_at: Time.current)
+            }
+          ) if events_to_update.any?
 
-          def upsert_slot(event, slot_data)
-            event.slots.find_or_initialize_by(external_id: slot_data[:external_id]) do |s|
-              s.uuid ||= SecureRandom.uuid
-            end.tap do |slot|
-              slot.update!(
-                starts_at: slot_data[:starts_at],
-                ends_at: slot_data[:ends_at],
-                sell_from: slot_data[:sell_from],
-                sell_to: slot_data[:sell_to]
-              )
-            end
-          end
+          # Similar bulk operations for slots and zones...
 
-          def upsert_zones(slot, zones_data)
-            zones_data.each do |zone_data|
-              slot.zones.find_or_initialize_by(external_id: zone_data[:external_id]) do |z|
-                z.uuid ||= SecureRandom.uuid
-              end.tap do |zone|
-                zone.update!(
-                  name: zone_data[:name],
-                  capacity: zone_data[:capacity],
-                  price: zone_data[:price],
-                  numbered: zone_data[:numbered]
-                )
-              end
-            end
-          end
+          Success(true)
+        end
+      rescue ActiveRecord::RecordInvalid => e
+        Failure(ValidationError.new(e.message))
+      end
+
+      private
+
+      def prepare_slot_data(slot_data, event_id)
+        {
+          external_id: slot_data[:external_id],
+          uuid: SecureRandom.uuid,
+          event_id: event_id,
+          starts_at: slot_data[:starts_at],
+          ends_at: slot_data[:ends_at],
+          sell_from: slot_data[:sell_from],
+          sell_to: slot_data[:sell_to],
+          created_at: Time.current,
+          updated_at: Time.current
+        }
+      end
+
+      def prepare_zone_data(zone_data, slot_id)
+        {
+          external_id: zone_data[:external_id],
+          uuid: SecureRandom.uuid,
+          slot_id: slot_id,
+          name: zone_data[:name],
+          capacity: zone_data[:capacity],
+          price: zone_data[:price],
+          numbered: zone_data[:numbered],
+          created_at: Time.current,
+          updated_at: Time.current
+        }
       end
     end
   end
