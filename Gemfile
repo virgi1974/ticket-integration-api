@@ -17,6 +17,12 @@ gem "solid_queue"
 gem "thruster", require: false
 gem "tzinfo-data", platforms: %i[ windows jruby ] # Windows does not include zoneinfo files
 
+# dry-rb gems
+gem "dry-monads", "~> 1.6"       # For Result/Try monads
+gem "dry-matcher", "~> 1.0"      # For pattern matching on monads
+gem "dry-struct", "~> 1.6"       # For typed structs (useful for response objects)
+gem "dry-types", "~> 1.7"        # Required by dry-struct, useful for type coercions
+
 group :development, :test do
   gem "brakeman", require: false # Static analysis for security vulnerabilities
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
