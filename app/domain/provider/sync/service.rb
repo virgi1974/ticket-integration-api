@@ -4,8 +4,8 @@ module Domain
       class Service
         include Result
 
-        def initialize(client: Client.new, parser: Parsers::Xml.new)
-          @client = client
+        def initialize(fetcher: EventsFetcher.new, parser: Parsers::Xml.new)
+          @fetcher = fetcher
           @parser = parser
         end
 
@@ -21,10 +21,10 @@ module Domain
 
         private
 
-        attr_reader :client, :parser
+        attr_reader :fetcher, :parser
 
         def fetch_data
-          client.fetch
+          fetcher.fetch
         end
 
         def parse_data(response)

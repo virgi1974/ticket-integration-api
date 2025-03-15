@@ -1,6 +1,6 @@
 module Domain
   module Provider
-    class Client
+    class EventsFetcher
       include Result
 
       PROVIDER_URL = "https://provider.code-challenge.feverup.com/api/events"
