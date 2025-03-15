@@ -6,7 +6,14 @@ scheduler = Rufus::Scheduler.singleton
 
 # Fetch events from provider every 5 minutes
 scheduler.every "5m", overlap: false do
-  Rails.logger.info "Starting sync with providerat #{Time.current}"
+  Rails.logger.info "Enqueueing provider sync job at #{Time.current}"
+  ProviderSyncJob.perform_later
+end
+
+# Initial sync on service startup
+scheduler.in "1s" do
+  Rails.logger.info "Enqueueing initial provider sync job at #{Time.current}"
+  ProviderSyncJob.perform_later
 end
 
 # TODO: HEALTHCHECK of the provider health endpoint if available
