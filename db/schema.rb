@@ -10,9 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_03_15_112853) do
+ActiveRecord::Schema[8.0].define(version: 2025_03_15_113217) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
 
+  create_table "events", force: :cascade do |t|
+    t.uuid "uuid", null: false
+    t.string "external_id", null: false
+    t.string "title", null: false
+    t.string "sell_mode", null: false
+    t.string "organizer_company_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_events_on_external_id", unique: true
+    t.index ["sell_mode"], name: "index_events_on_sell_mode"
+  end
 end
