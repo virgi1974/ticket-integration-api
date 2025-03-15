@@ -16,7 +16,7 @@ class ProviderSyncJob < ApplicationJob
   discard_on Domain::Provider::ValidationError
 
   def perform
-    Domain::Provider::Sync::Service.call.match do |m|
+    Domain::Provider::Services::EventsSynchronizer.call.match do |m|
       m.success { |_| Rails.logger.info("Provider sync completed successfully") }
       m.failure { |e| handle_error(e) }
     end

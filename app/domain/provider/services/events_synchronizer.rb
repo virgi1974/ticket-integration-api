@@ -1,8 +1,12 @@
 module Domain
   module Provider
-    module Sync
-      class Service
-        def initialize(fetcher:, parser:, persister:)
+    module Services
+      class EventsSynchronizer
+        def initialize(
+          fetcher: Services::EventsFetcher.new,
+          parser: Parsers::Xml.new,
+          persister: Services::EventsPersister.new
+        )
           @fetcher = fetcher
           @parser = parser
           @persister = persister
