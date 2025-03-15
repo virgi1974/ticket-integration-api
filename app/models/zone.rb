@@ -15,4 +15,10 @@
 #
 class Zone < ApplicationRecord
   belongs_to :slot
+
+  validates :uuid, presence: true, uniqueness: { case_sensitive: false }
+  validates :external_id, presence: true
+  validates :name, presence: true
+  validates :capacity, presence: true, numericality: { only_integer: true, greater_than: 0 }
+  validates :price, presence: true, numericality: { greater_than_or_equal_to: 0 }
 end

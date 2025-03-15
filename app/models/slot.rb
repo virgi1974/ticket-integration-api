@@ -17,4 +17,11 @@
 class Slot < ApplicationRecord
   has_many :zones
   belongs_to :event
+
+  validates :uuid, presence: true, uniqueness: { case_sensitive: false }
+  validates :external_id, presence: true
+  validates :starts_at, presence: true
+  validates :ends_at, presence: true
+  validates :sell_from, presence: true
+  validates :sell_to, presence: true
 end

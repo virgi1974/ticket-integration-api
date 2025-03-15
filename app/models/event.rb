@@ -12,4 +12,9 @@
 #
 class Event < ApplicationRecord
   has_many :slots
+
+  validates :uuid, presence: true, uniqueness: { case_sensitive: false }
+  validates :external_id, presence: true
+  validates :title, presence: true
+  validates :sell_mode, presence: true
 end
