@@ -17,8 +17,14 @@ module Provider
       end
 
       def fetch
-        response = @http_client.get(PROVIDER_URL)
-        Success(build_response(response))
+        http_response = @http_client.get(PROVIDER_URL)
+        custom_response = build_response(http_response)
+
+        if custom_response.success?
+          Success(custom_response)
+        else
+          Failure(NetworkError.new("Server error: #{custom_response.status}"))
+        end
       rescue Faraday::Error => e
         Failure(NetworkError.new(e.message))
       end
