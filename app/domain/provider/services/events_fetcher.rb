@@ -5,34 +5,32 @@
 # - Wraps responses in our domain objects
 # - Returns Success/Failure results
 
-module Domain
-  module Provider
-    module Services
-      class EventsFetcher
-        include Result
+module Provider
+  module Services
+    class EventsFetcher
+      include Result
 
-        PROVIDER_URL = "https://provider.code-challenge.feverup.com/api/events"
+      PROVIDER_URL = "https://provider.code-challenge.feverup.com/api/events"
 
-        def initialize(http_client = HttpClient.instance)
-          @http_client = http_client
-        end
+      def initialize(http_client = HttpClient.instance)
+        @http_client = http_client
+      end
 
-        def fetch
-          response = @http_client.get(PROVIDER_URL)
-          Success(build_response(response))
-        rescue Faraday::Error => e
-          Failure(NetworkError.new(e.message))
-        end
+      def fetch
+        response = @http_client.get(PROVIDER_URL)
+        Success(build_response(response))
+      rescue Faraday::Error => e
+        Failure(NetworkError.new(e.message))
+      end
 
-        private
+      private
 
-        def build_response(response)
-          Response.new(
-            body: response.body,
-            content_type: response.headers["Content-Type"],
-            status: response.status
-          )
-        end
+      def build_response(response)
+        Response.new(
+          body: response.body,
+          content_type: response.headers["Content-Type"],
+          status: response.status
+        )
       end
     end
   end

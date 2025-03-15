@@ -5,8 +5,9 @@
 # - Separates domain errors from Ruby errors
 # - Helps with error classification
 
-module Domain
-  module Provider
+
+module Provider
+  module Errors
     class Error < StandardError; end
     class NetworkError < Error; end
     class ParsingError < Error; end
