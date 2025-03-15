@@ -46,6 +46,7 @@ group :development, :test do
 
   # Test data generation
   gem "factory_bot_rails", "~> 6.4"
+  gem "pry", "~> 0.15.2"
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
