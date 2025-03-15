@@ -14,4 +14,5 @@
 #  updated_at  :datetime         not null
 #
 class Zone < ApplicationRecord
+  belongs_to :slot
 end

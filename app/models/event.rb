@@ -11,4 +11,5 @@
 #  updated_at        :datetime         not null
 #
 class Event < ApplicationRecord
+  has_many :slots
 end

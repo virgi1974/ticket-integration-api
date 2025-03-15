@@ -15,4 +15,6 @@
 #  updated_at  :datetime         not null
 #
 class Slot < ApplicationRecord
+  has_many :zones
+  belongs_to :event
 end
