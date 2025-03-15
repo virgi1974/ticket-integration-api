@@ -12,6 +12,7 @@ gem "puma", ">= 5.0"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
+gem "nokogiri", "~> 1.12", ">= 1.12.4"
 
 # Use the database-backed adapters for Rails.cache and Active Job
 gem "solid_cache"

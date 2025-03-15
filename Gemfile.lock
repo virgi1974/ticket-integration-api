@@ -346,6 +346,7 @@ DEPENDENCIES
   faraday
   faraday-retry
   kamal
+  nokogiri (~> 1.12, >= 1.12.4)
   pg (~> 1.1)
   puma (>= 5.0)
   rails (~> 8.0.1)
