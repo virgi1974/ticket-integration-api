@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_03_15_120310) do
+ActiveRecord::Schema[8.0].define(version: 2025_03_15_124239) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -43,5 +43,19 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_15_120310) do
     t.index ["starts_at"], name: "index_slots_on_starts_at"
   end
 
+  create_table "zones", force: :cascade do |t|
+    t.uuid "uuid", null: false
+    t.string "external_id", null: false
+    t.bigint "slot_id", null: false
+    t.string "name", null: false
+    t.integer "capacity", null: false
+    t.decimal "price", precision: 10, scale: 2, null: false
+    t.boolean "numbered", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["slot_id"], name: "index_zones_on_slot_id"
+  end
+
   add_foreign_key "slots", "events"
+  add_foreign_key "zones", "slots"
 end
