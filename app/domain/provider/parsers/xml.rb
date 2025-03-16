@@ -10,12 +10,26 @@ module Provider
   module Parsers
     class Xml < Base
       def parse(content)
-        doc = Nokogiri::XML(content.body)
+        if content.body.empty?
+          return Failure(Provider::Errors::ParsingError.new("Empty XML response"))
+        end
+
+        # Add strict mode and validation
+        doc = Nokogiri::XML(content.body) do |config|
+          config.strict
+          config.noblanks
+        end
+
+        # Check for parsing errors
+        if doc.errors.any?
+          return Failure(Provider::Errors::ParsingError.new(doc.errors.join(", ")))
+        end
+
         Success(
           events: parse_events(doc)
         )
       rescue Nokogiri::XML::SyntaxError => e
-        Failure(ParsingError.new(e.message))
+        Failure(Provider::Errors::ParsingError.new(e.message))
       end
 
       private
