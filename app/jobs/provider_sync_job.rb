@@ -51,13 +51,6 @@ class ProviderSyncJob < ApplicationJob
 
   def handle_error(error)
     Rails.logger.error("Provider sync failed: #{error.message}")
-    case error
-    when StandardError
-      raise error
-    when Dry::Monads::Result::Failure
-      raise error.value
-    else
-      raise "Unknown error type: #{error.class}"
-    end
+    raise error
   end
 end
