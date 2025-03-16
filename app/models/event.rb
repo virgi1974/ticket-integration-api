@@ -20,8 +20,9 @@ class Event < ApplicationRecord
 
   scope :available_in_range, ->(starts_at:, ends_at:) do
     where(sell_mode: "online")
-      .where("slots.starts_at >= ? AND slots.ends_at <= ?", starts_at, ends_at)
-      .joins(:slots)
-      .distinct
+    .joins(:slots)
+    .where("slots.starts_at >= ? AND slots.ends_at <= ?", starts_at, ends_at)
+    .includes(slots: :zones)
+    .distinct
   end
 end

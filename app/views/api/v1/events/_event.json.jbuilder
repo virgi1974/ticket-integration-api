@@ -6,6 +6,6 @@ json.sell_mode event.sell_mode
 json.organizer_company_id event.organizer_company_id
 json.created_at event.created_at
 
-json.slots event.slots.select { |slot| slot.starts_at >= Time.parse(params[:starts_at]) && slot.ends_at <= Time.parse(params[:ends_at]) } do |slot|
+json.slots event.slots do |slot|
   json.partial! "api/v1/slots/slot", slot: slot
 end
