@@ -2,18 +2,8 @@ module Api
   module V1
     class EventsController < ApplicationController
       def index
-        begin
-          date_range = DateRange.new(
-            starts_at: params[:starts_at],
-            ends_at: params[:ends_at]
-          )
-
-          unless date_range.valid?
-            return render json: { errors: date_range.errors }, status: :bad_request
-          end
-        rescue Dry::Struct::Error => e
-          return render json: { errors: [ "Invalid date format" ] }, status: :bad_request
-        end
+        date_range = build_date_range
+        return if performed?
 
         # Get events without pagination first
         events_query = Event.available_in_range(
@@ -38,6 +28,25 @@ module Api
         }
 
         render :index
+      end
+
+      private
+
+      def build_date_range
+        date_range = DateRange.new(
+          starts_at: params[:starts_at],
+          ends_at: params[:ends_at]
+        )
+
+        unless date_range.valid?
+          render json: { errors: date_range.errors }, status: :bad_request
+          return
+        end
+
+        date_range
+
+      rescue Dry::Struct::Error => e
+        render json: { errors: ["Invalid date format"] }, status: :bad_request
       end
     end
   end
