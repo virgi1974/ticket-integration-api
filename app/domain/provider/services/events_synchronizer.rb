@@ -8,21 +8,13 @@
 module Provider
   module Services
     class EventsSynchronizer
-      def initialize(
-        fetcher: Services::EventsFetcher.new,
-        parser: Parsers::Xml.new,
-        persister: Services::EventsPersister.new
-      )
+      def initialize(fetcher:, parser:, persister:)
         @fetcher = fetcher
         @parser = parser
         @persister = persister
       end
 
-      def self.call(
-        fetcher: EventsFetcher.new,
-        parser: Parsers::Xml.new,
-        persister: EventsPersister.new
-      )
+      def self.call(fetcher:, parser:, persister:)
         new(fetcher:, parser:, persister:).call
       end
 

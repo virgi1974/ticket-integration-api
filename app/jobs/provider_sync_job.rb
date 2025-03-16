@@ -19,7 +19,11 @@ class ProviderSyncJob < ApplicationJob
   discard_on Provider::Errors::ValidationError
 
   def perform
-    operation = Provider::Services::EventsSynchronizer.call
+    operation = Provider::Services::EventsSynchronizer.call(
+      fetcher: fetcher,
+      parser: parser,
+      persister: persister
+    )
 
     if operation.success?
       Rails.logger.info("Provider sync completed successfully")
@@ -32,6 +36,18 @@ class ProviderSyncJob < ApplicationJob
   end
 
   private
+
+  def fetcher
+    Provider::Services::EventsFetcher.new
+  end
+
+  def parser
+    Provider::Parsers::Xml.new
+  end
+
+  def persister
+    Provider::Services::EventsPersister.new
+  end
 
   def handle_error(error)
     Rails.logger.error("Provider sync failed: #{error.message}")
