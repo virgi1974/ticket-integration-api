@@ -2,18 +2,23 @@ module Api
   module V1
     class EventsController < ApplicationController
       def index
-        start_time = Time.parse(params[:starts_at]) rescue nil
-        end_time = Time.parse(params[:ends_at]) rescue nil
+        begin
+          date_range = DateRange.new(
+            starts_at: params[:starts_at],
+            ends_at: params[:ends_at]
+          )
 
-        # Return error if dates are invalid
-        unless start_time && end_time
-          return render json: { error: "Invalid date format" }, status: :bad_request
+          unless date_range.valid?
+            return render json: { errors: date_range.errors }, status: :bad_request
+          end
+        rescue Dry::Struct::Error => e
+          return render json: { errors: [ "Invalid date format" ] }, status: :bad_request
         end
 
         # Get events without pagination first
         events_query = Event.available_in_range(
-          starts_at: start_time,
-          ends_at: end_time
+          starts_at: date_range.starts_at,
+          ends_at: date_range.ends_at
         )
 
         # Get page and per_page parameters with defaults
@@ -22,6 +27,7 @@ module Api
 
         # Apply pagination
         @events = events_query.limit(per_page).offset((page - 1) * per_page)
+
         # Calculate pagination metadata
         total_count = events_query.count
         @pagination = {
