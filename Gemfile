@@ -16,6 +16,7 @@ gem "solid_queue"
 # Add HTTP asset caching/compression and X-Sendfile acceleration to Puma [https://github.com/basecamp/thruster/]
 gem "thruster", require: false
 gem "tzinfo-data", platforms: %i[ windows jruby ] # Windows does not include zoneinfo files
+gem "jbuilder"
 
 # dry-rb gems
 gem "dry-monads", "~> 1.6"       # For Result/Try monads

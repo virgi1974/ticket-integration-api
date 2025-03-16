@@ -151,6 +151,9 @@ GEM
       pp (>= 0.6.0)
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
+    jbuilder (2.13.0)
+      actionview (>= 5.0.0)
+      activesupport (>= 5.0.0)
     json (2.10.2)
     kamal (2.5.3)
       activesupport (>= 7.0)
@@ -383,6 +386,7 @@ DEPENDENCIES
   factory_bot_rails (~> 6.4)
   faraday
   faraday-retry
+  jbuilder
   kamal
   nokogiri (~> 1.12, >= 1.12.4)
   pg (~> 1.1)
