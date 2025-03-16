@@ -18,6 +18,22 @@ class ProviderSyncJob < ApplicationJob
   # Skip retries for these errors
   discard_on Provider::Errors::ValidationError
 
+  # Custom exception handler that runs after all retries are exhausted
+  rescue_from Provider::Errors::NetworkError do |exception|
+    Rails.logger.error("PROVIDER SYNC FAILED: Network error after all retries: #{exception.message}")
+    # TODO: Send alert or notification
+  end
+
+  rescue_from Provider::Errors::ParsingError do |exception|
+    Rails.logger.error("PROVIDER SYNC FAILED: Parsing error after all retries: #{exception.message}")
+    # TODO: Send alert or notification
+  end
+
+  rescue_from StandardError do |exception|
+    Rails.logger.error("PROVIDER SYNC FAILED: Unexpected error after all retries: #{exception.class} - #{exception.message}")
+    # TODO: Send alert or notification
+  end
+
   def perform
     operation = Provider::Services::EventsSynchronizer.call(
       fetcher: fetcher,
@@ -30,9 +46,6 @@ class ProviderSyncJob < ApplicationJob
     else
       handle_error(operation.failure)
     end
-  rescue StandardError => e
-    Rails.logger.error("Unexpected error: #{e.class} - #{e.message}")
-    raise
   end
 
   private
