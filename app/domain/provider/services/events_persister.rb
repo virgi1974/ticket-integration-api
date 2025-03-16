@@ -13,89 +13,93 @@ module Provider
 
       def persist(data)
         ActiveRecord::Base.transaction do
-          # Collect all external IDs first
-          event_ids = data[:events].map { |e| e[:external_id] }
-          slot_ids = data[:events].flat_map { |e| e[:slots].map { |s| s[:external_id] } }
-          zone_ids = data[:events].flat_map { |e|
-            e[:slots].flat_map { |s| s[:zones].map { |z| z[:external_id] } }
-          }
+          # Collect event data first
+          event_data = data[:events].map do |e|
+            {
+              external_id: e[:external_id],
+              uuid: SecureRandom.uuid,
+              title: e[:title],
+              sell_mode: e[:sell_mode],
+              created_at: Time.current,
+              updated_at: Time.current
+            }
+          end
 
-          # Fetch existing records in bulk
-          existing_events = Event.where(external_id: event_ids).index_by(&:external_id)
-          existing_slots = Slot.where(external_id: slot_ids).index_by(&:external_id)
-          existing_zones = Zone.where(external_id: zone_ids).index_by(&:external_id)
+          # Bulk insert events, skipping duplicates
+          Event.upsert_all(
+            event_data,
+            unique_by: :external_id,
+            returning: [ :id, :external_id ]
+          )
 
-          # Prepare bulk inserts/updates
-          events_to_insert = []
-          events_to_update = []
-          slots_to_insert = []
-          slots_to_update = []
-          zones_to_insert = []
-          zones_to_update = []
+          # Get fresh events data for associations
+          events_map = Event.where(external_id: data[:events].map { |e| e[:external_id] })
+                           .index_by(&:external_id)
 
-          # Process events
+          # Prepare slots data
+          slots_data = []
           data[:events].each do |event_data|
-            event = existing_events[event_data[:external_id]]
-            if event
-              events_to_update << [event, event_data]
-            else
-              events_to_insert << {
-                external_id: event_data[:external_id],
+            event = events_map[event_data[:external_id]]
+            Array(event_data[:slots]).each do |slot|
+              slots_data << {
+                external_id: slot[:external_id],
                 uuid: SecureRandom.uuid,
-                title: event_data[:title],
-                sell_mode: event_data[:sell_mode],
+                event_id: event.id,
+                starts_at: slot[:starts_at],
+                ends_at: slot[:ends_at],
+                sell_from: slot[:sell_from],
+                sell_to: slot[:sell_to],
                 created_at: Time.current,
                 updated_at: Time.current
               }
             end
-
-            # Similar for slots and zones...
           end
 
-          # Perform bulk operations
-          Event.insert_all(events_to_insert) if events_to_insert.any?
-          Event.upsert_all(
-            events_to_update.map { |event, data|
-              data.merge(id: event.id, updated_at: Time.current)
-            }
-          ) if events_to_update.any?
+          # Bulk insert slots
+          created_slots = Slot.insert_all(
+            slots_data,
+            returning: [ :id, :external_id, :event_id ]
+          )
 
-          # Similar bulk operations for slots and zones...
+          # Map new slot ids using composite key of event_id + external_id
+          slots_map = created_slots.rows.each_with_object({}) do |(id, external_id, event_id), map|
+            map["#{event_id}-#{external_id}"] = id
+          end
+
+          # Prepare zones data
+          zones_data = []
+          data[:events].each do |event_data|
+            event = events_map[event_data[:external_id]]
+            Array(event_data[:slots]).each do |slot_data|
+              # Use composite key to look up correct slot
+              slot_key = "#{event.id}-#{slot_data[:external_id]}"
+              slot_id = slots_map[slot_key]
+
+              Array(slot_data[:zones]).each do |zone|
+                zones_data << {
+                  external_id: zone[:external_id],
+                  uuid: SecureRandom.uuid,
+                  slot_id: slot_id,  # Now we get the correct slot_id
+                  name: zone[:name],
+                  capacity: zone[:capacity],
+                  price: zone[:price],
+                  numbered: zone[:numbered],
+                  created_at: Time.current,
+                  updated_at: Time.current
+                }
+              end
+            end
+          end
+
+          # Bulk insert zones
+          Zone.insert_all(zones_data) if zones_data.any?
 
           Success(true)
         end
       rescue ActiveRecord::RecordInvalid => e
         Failure(ValidationError.new(e.message))
-      end
-
-      private
-
-      def prepare_slot_data(slot_data, event_id)
-        {
-          external_id: slot_data[:external_id],
-          uuid: SecureRandom.uuid,
-          event_id: event_id,
-          starts_at: slot_data[:starts_at],
-          ends_at: slot_data[:ends_at],
-          sell_from: slot_data[:sell_from],
-          sell_to: slot_data[:sell_to],
-          created_at: Time.current,
-          updated_at: Time.current
-        }
-      end
-
-      def prepare_zone_data(zone_data, slot_id)
-        {
-          external_id: zone_data[:external_id],
-          uuid: SecureRandom.uuid,
-          slot_id: slot_id,
-          name: zone_data[:name],
-          capacity: zone_data[:capacity],
-          price: zone_data[:price],
-          numbered: zone_data[:numbered],
-          created_at: Time.current,
-          updated_at: Time.current
-        }
+      rescue StandardError => e
+        Failure(e.message)
       end
     end
   end
