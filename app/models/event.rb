@@ -17,4 +17,11 @@ class Event < ApplicationRecord
   validates :external_id, presence: true
   validates :title, presence: true
   validates :sell_mode, presence: true
+
+  scope :available_in_range, ->(starts_at:, ends_at:) do
+    where(sell_mode: "online")
+      .where("slots.starts_at >= ? AND slots.ends_at <= ?", starts_at, ends_at)
+      .joins(:slots)
+      .distinct
+  end
 end
