@@ -6,6 +6,7 @@ gem "faraday"
 gem "faraday-retry"
 # Deploy this application anywhere as a Docker container [https://github.com/basecamp/kamal]
 gem "kamal", require: false
+gem "kaminari"
 gem "nokogiri", "~> 1.12", ">= 1.12.4"
 gem "pg", "~> 1.1" # Use postgresql as the database for Active Record
 gem "puma", ">= 5.0" # Use the Puma web server [https://github.com/puma/puma]
