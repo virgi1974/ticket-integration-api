@@ -10,7 +10,7 @@ module Provider
   module Parsers
     class Xml < Base
       def parse(content)
-        doc = Nokogiri::XML(content)
+        doc = Nokogiri::XML(content.body)
         Success(
           events: parse_events(doc)
         )
