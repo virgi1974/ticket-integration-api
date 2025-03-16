@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_03_15_124239) do
+ActiveRecord::Schema[8.0].define(version: 2025_03_16_203609) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -38,9 +38,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_15_124239) do
     t.boolean "sold_out", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["ends_at"], name: "index_slots_on_ends_at"
     t.index ["event_id"], name: "index_slots_on_event_id"
-    t.index ["starts_at"], name: "index_slots_on_starts_at"
+    t.index ["starts_at", "ends_at"], name: "index_slots_on_starts_at_and_ends_at"
   end
 
   create_table "zones", force: :cascade do |t|
