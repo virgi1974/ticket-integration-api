@@ -12,20 +12,36 @@ class ProviderSyncJob < ApplicationJob
     wait: 30.seconds,
     attempts: 2
 
+  # Catch all other errors (with default retry settings)
+  retry_on StandardError, attempts: 3
+
   # Skip retries for these errors
   discard_on Provider::Errors::ValidationError
 
   def perform
-      Provider::Services::EventsSynchronizer.call.match do |m|
-      m.success { |_| Rails.logger.info("Provider sync completed successfully") }
-      m.failure { |e| handle_error(e) }
+    operation = Provider::Services::EventsSynchronizer.call
+
+    if operation.success?
+      Rails.logger.info("Provider sync completed successfully")
+    else
+      handle_error(operation.failure)
     end
+  rescue StandardError => e
+    Rails.logger.error("Unexpected error: #{e.class} - #{e.message}")
+    raise
   end
 
   private
 
   def handle_error(error)
     Rails.logger.error("Provider sync failed: #{error.message}")
-    raise error
+    case error
+    when StandardError
+      raise error
+    when Dry::Monads::Result::Failure
+      raise error.value
+    else
+      raise "Unknown error type: #{error.class}"
+    end
   end
 end
