@@ -5,13 +5,11 @@
 # - Standardizes Success/Failure handling
 # - Enables functional composition
 
-require "dry/matcher/result_matcher"
-
 module Provider
   module Result
     def self.included(base)
-      base.include Dry::Monads[:result, :try]
-      base.include Dry::Matcher.for(:call, with: Dry::Matcher::ResultMatcher)
+      base.include Dry::Monads[:result]
+      base.extend Dry::Monads[:result]
     end
   end
 end
