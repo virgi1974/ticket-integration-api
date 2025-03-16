@@ -23,10 +23,10 @@ module Provider
         if custom_response.success?
           Success(custom_response)
         else
-          Failure(NetworkError.new("Server error: #{custom_response.status}"))
+          Failure(Provider::Errors::NetworkError.new("Server error: #{custom_response.status}"))
         end
       rescue Faraday::Error => e
-        Failure(NetworkError.new(e.message))
+        Failure(Provider::Errors::NetworkError.new(e.message))
       end
 
       private
