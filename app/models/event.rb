@@ -12,6 +12,7 @@
 #
 class Event < ApplicationRecord
   has_many :slots
+  has_many :current_slots, -> { where(current: true) }, class_name: "Slot"
 
   validates :uuid, presence: true, uniqueness: { case_sensitive: false }
   validates :external_id, presence: true
@@ -20,9 +21,9 @@ class Event < ApplicationRecord
 
   scope :available_in_range, ->(starts_at:, ends_at:) do
     where(sell_mode: "online")
-    .joins(:slots)
-    .where("slots.starts_at >= ? AND slots.ends_at <= ?", starts_at, ends_at)
-    .includes(slots: :zones)
-    .distinct
+      .joins(:current_slots)
+      .where("slots.starts_at >= ? AND slots.ends_at <= ?", starts_at, ends_at)
+      .preload(current_slots: :zones)
+      .distinct
   end
 end
