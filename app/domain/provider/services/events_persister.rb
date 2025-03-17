@@ -17,6 +17,9 @@ module Provider
           persist_event_records(event_records:)
           events_map = map_events(data:)
 
+          # Mark existing slots as not current before creating new ones
+          update_existing_slots(events_map: events_map)
+
           slots_data = create_slot_objects(data:, events_map:)
           created_slots = persist_slot_records(slots_data:)
           slots_map = map_slots(created_slots:)
@@ -48,7 +51,7 @@ module Provider
       def persist_slot_records(slots_data:)
         Slot.insert_all(
           slots_data,
-          returning: [:id, :external_id, :event_id]
+          returning: [ :id, :external_id, :event_id ]
         )
       end
 
@@ -88,13 +91,20 @@ module Provider
         Event.upsert_all(
             event_records,
             unique_by: :external_id,
-            returning: [:id, :external_id]
+            returning: [ :id, :external_id ]
           )
       end
 
       def map_events(data:)
         Event.where(external_id: data[:events].map { |e| e[:external_id] })
                            .index_by(&:external_id)
+      end
+
+      # New method to update existing slots
+      def update_existing_slots(events_map:)
+        event_ids = events_map.values.map(&:id)
+        Slot.where(event_id: event_ids, current: true)
+            .update_all(current: false)
       end
     end
   end
