@@ -23,6 +23,9 @@ module Api
         # Execute the strategy
         result = strategy.execute
 
+        # Apply cache headers
+        apply_cache_headers
+
         if result[:from_cache]
           # Serve directly from cache
           render json: result[:json]
@@ -43,6 +46,14 @@ module Api
       end
 
       private
+
+      def apply_cache_headers
+        # Set cache headers for browsers and CDNs
+        # - public: Response can be cached by browsers and CDNs
+        # - max-age: Browser cache duration (1 minute)
+        # - s-maxage: CDN cache duration (5 minutes)
+        response.headers["Cache-Control"] = "public, max-age=60, s-maxage=300"
+      end
 
       def build_date_range
         date_range = DateRange.new(
