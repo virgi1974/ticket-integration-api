@@ -70,6 +70,9 @@ module Api
       end
 
       def fetch_from_database(date_range, page, per_page)
+        # Ensure page is at least 1
+        page = [ page, 1 ].max
+
         # Get events without pagination first
         events_query = Event.available_in_range(
           starts_at: date_range.starts_at,
