@@ -200,5 +200,37 @@ RSpec.describe Api::V1::EventsController, type: :controller do
         expect(json["meta"]).to have_key("pagination")
       end
     end
+
+    context "when database errors occur" do
+      before do
+        allow(Events::FetchStrategy).to receive(:for).and_raise(ActiveRecord::StatementInvalid.new("Database connection error"))
+        get :index, params: { starts_at: starts_at, ends_at: ends_at }, format: :json
+      rescue ActiveRecord::StatementInvalid
+        # Expected to raise error
+      end
+
+      it "raises database errors" do
+        expect {
+          get :index, params: { starts_at: starts_at, ends_at: ends_at }, format: :json
+        }.to raise_error(ActiveRecord::StatementInvalid)
+      end
+    end
+
+    context "with missing parameters" do
+      it "returns bad request when both dates are missing" do
+        get :index, params: {}, format: :json
+        expect(response).to have_http_status(:bad_request)
+      end
+
+      it "returns bad request when only starts_at is provided" do
+        get :index, params: { starts_at: starts_at }, format: :json
+        expect(response).to have_http_status(:bad_request)
+      end
+
+      it "returns bad request when only ends_at is provided" do
+        get :index, params: { ends_at: ends_at }, format: :json
+        expect(response).to have_http_status(:bad_request)
+      end
+    end
   end
 end
