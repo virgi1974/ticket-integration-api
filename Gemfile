@@ -18,6 +18,7 @@ gem "solid_queue"
 gem "thruster", require: false
 gem "tzinfo-data", platforms: %i[ windows jruby ] # Windows does not include zoneinfo files
 gem "jbuilder"
+gem "redis"
 
 # dry-rb gems
 gem "dry-monads", "~> 1.6"       # For Result/Try monads
