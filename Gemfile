@@ -39,3 +39,8 @@ end
 # Commented out gems kept for reference
 # gem "bcrypt", "~> 3.1.7" # Use Active Model has_secure_password
 # gem "rack-cors" # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS)
+
+group :test do
+  # Add SimpleCov for test coverage reporting
+  gem "simplecov", require: false
+end
