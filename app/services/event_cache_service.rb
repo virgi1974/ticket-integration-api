@@ -9,12 +9,17 @@ class EventCacheService
     redis = RedisConnection.connection
     return nil unless redis
 
-    # Try to get from cache
-    cached_result = redis.get(cache_key)
-    if cached_result
-      # Update access time for LRU
-      redis.zadd("events:lru", Time.now.to_i, cache_key)
-      return cached_result  # Return the JSON string directly
+    begin
+      # Try to get from cache
+      cached_result = redis.get(cache_key)
+      if cached_result
+        # Update access time for LRU
+        redis.zadd("events:lru", Time.now.to_i, cache_key)
+        return cached_result
+      end
+    rescue Redis::BaseError => e
+      Rails.logger.error "Redis error during cache fetch: #{e.message}"
+      # Fall through to return nil
     end
 
     nil
@@ -22,22 +27,27 @@ class EventCacheService
 
   def self.set(cache_key, data, ttl = DEFAULT_TTL)
     redis = RedisConnection.connection
-    return data unless redis
+    return nil unless redis
 
-    # If data is already a string, store it directly
-    # Otherwise, convert to JSON
-    json_data = data.is_a?(String) ? data : data.to_json
+    begin
+      # If data is already a string, store it directly
+      # Otherwise, convert to JSON
+      json_data = data.is_a?(String) ? data : data.to_json
 
-    # Cache the result
-    redis.setex(cache_key, ttl, json_data)
+      # Cache the result
+      redis.setex(cache_key, ttl, json_data)
 
-    # Add to LRU sorted set
-    redis.zadd("events:lru", Time.now.to_i, cache_key)
+      # Add to LRU sorted set
+      redis.zadd("events:lru", Time.now.to_i, cache_key)
 
-    # Prune cache if needed
-    prune_cache if redis.zcard("events:lru") > MAX_CACHE_ENTRIES
+      # Prune cache if needed
+      prune_cache if redis.zcard("events:lru") > MAX_CACHE_ENTRIES
+    rescue Redis::BaseError => e
+      Rails.logger.error "Redis error during cache storage: #{e.message}"
+      # Continue without caching
+    end
 
-    data
+    nil
   end
 
   def self.generate_events_key(starts_at, ends_at, page = nil, per_page = nil)
