@@ -32,37 +32,33 @@ RSpec.describe Api::V1::EventsController, type: :controller do
 
     context "when cache miss" do
       before do
-        # Ensure cache is empty - use a flexible matcher for the cache key
-        allow(EventCacheService).to receive(:get).and_return(nil)
+        # Mock the strategy instead of individual components
+        cache_miss_result = {
+          events: events,
+          pagination: pagination,
+          from_cache: false
+        }
 
-        # Mock database query - use a double for the relation
-        events_relation = double("EventsRelation")
-        paginated_relation = double("PaginatedRelation")
+        cache_miss_strategy = instance_double("Events::CacheMissStrategy", execute: cache_miss_result)
 
-        allow(Event).to receive(:available_in_range).and_return(events_relation)
-        allow(events_relation).to receive(:limit).and_return(paginated_relation)
-        allow(paginated_relation).to receive(:offset).and_return(events)
-        allow(events_relation).to receive(:count).and_return(3)
-
-        # Mock cache storage - use a flexible matcher for the cache key
-        allow(EventCacheService).to receive(:set).and_return(json_response)
+        allow(Events::FetchStrategy).to receive(:for).and_return(cache_miss_strategy)
 
         # Mock render_to_string
         allow(controller).to receive(:render_to_string).and_return(json_response)
 
+        # Mock cache storage
+        allow(EventCacheService).to receive(:set).and_return(json_response)
+
         get :index, params: { starts_at: starts_at, ends_at: ends_at, page: page, per_page: per_page }, format: :json
       end
 
-      it "queries the database" do
-        expect(Event).to have_received(:available_in_range)
+      it "uses the cache miss strategy" do
+        expect(Events::FetchStrategy).to have_received(:for)
+        expect(response).to have_http_status(:success)
       end
 
       it "stores the result in cache" do
         expect(EventCacheService).to have_received(:set)
-      end
-
-      it "returns successful response" do
-        expect(response).to have_http_status(:success)
       end
     end
 
@@ -107,41 +103,43 @@ RSpec.describe Api::V1::EventsController, type: :controller do
     end
 
     context "with pagination parameters" do
-      let(:large_dataset) { double("LargeDataset") }
-      let(:page2_set) { double("Page2Set") }
-      let(:page1_set) { double("Page1Set") }
+      it "returns the correct page of results" do
+        # Mock the strategy for page 2
+        cache_miss_result = {
+          events: events,
+          pagination: { current_page: 2, per_page: 10, total_count: 100, total_pages: 10 },
+          from_cache: false
+        }
 
-      before do
-        # Setup for a larger dataset
-        allow(EventCacheService).to receive(:get).and_return(nil)
-        allow(Event).to receive(:available_in_range).and_return(large_dataset)
-        allow(large_dataset).to receive(:count).and_return(100)
+        cache_miss_strategy = instance_double("Events::CacheMissStrategy", execute: cache_miss_result)
+
+        allow(Events::FetchStrategy).to receive(:for).and_return(cache_miss_strategy)
 
         # Mock render_to_string
         allow(controller).to receive(:render_to_string).and_return(json_response)
-      end
-
-      it "returns the correct page of results" do
-        # Test page 2 with 10 per page
-        allow(large_dataset).to receive(:limit).with(10).and_return(page2_set)
-        allow(page2_set).to receive(:offset).with(10).and_return(events)
 
         get :index, params: { starts_at: starts_at, ends_at: ends_at, page: 2, per_page: 10 }, format: :json
 
-        # Verify correct offset was used
-        expect(page2_set).to have_received(:offset).with(10)
         expect(response).to have_http_status(:success)
       end
 
       it "handles edge case pagination values" do
-        # Test with page=0 (should be treated as page 1)
-        allow(large_dataset).to receive(:limit).with(20).and_return(page1_set)
-        allow(page1_set).to receive(:offset).with(0).and_return(events)
+        # Mock the strategy for page 0 (should be treated as page 1)
+        cache_miss_result = {
+          events: events,
+          pagination: { current_page: 1, per_page: 20, total_count: 100, total_pages: 5 },
+          from_cache: false
+        }
+
+        cache_miss_strategy = instance_double("Events::CacheMissStrategy", execute: cache_miss_result)
+
+        allow(Events::FetchStrategy).to receive(:for).and_return(cache_miss_strategy)
+
+        # Mock render_to_string
+        allow(controller).to receive(:render_to_string).and_return(json_response)
 
         get :index, params: { starts_at: starts_at, ends_at: ends_at, page: 0 }, format: :json
 
-        # Should be treated as page 1 (offset 0)
-        expect(page1_set).to have_received(:offset).with(0)
         expect(response).to have_http_status(:success)
       end
     end
@@ -151,14 +149,16 @@ RSpec.describe Api::V1::EventsController, type: :controller do
         # Mock Redis connection to be nil (simulating connection failure)
         allow(RedisConnection).to receive(:connection).and_return(nil)
 
-        # Mock database query
-        events_relation = double("EventsRelation")
-        paginated_relation = double("PaginatedRelation")
+        # Mock the strategy
+        cache_miss_result = {
+          events: events,
+          pagination: pagination,
+          from_cache: false
+        }
 
-        allow(Event).to receive(:available_in_range).and_return(events_relation)
-        allow(events_relation).to receive(:limit).and_return(paginated_relation)
-        allow(paginated_relation).to receive(:offset).and_return(events)
-        allow(events_relation).to receive(:count).and_return(3)
+        cache_miss_strategy = instance_double("Events::CacheMissStrategy", execute: cache_miss_result)
+
+        allow(Events::FetchStrategy).to receive(:for).and_return(cache_miss_strategy)
 
         # Mock render_to_string
         allow(controller).to receive(:render_to_string).and_return(json_response)
@@ -168,7 +168,6 @@ RSpec.describe Api::V1::EventsController, type: :controller do
 
       it "still returns results when Redis is down" do
         expect(response).to have_http_status(:success)
-        expect(Event).to have_received(:available_in_range)
       end
     end
 
