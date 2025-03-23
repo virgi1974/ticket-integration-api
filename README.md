@@ -60,6 +60,10 @@ make setup    # Set up the database
 make run      # Start the application
 make test     # Run tests
 ```
+or for a full cleanup and setup:
+```bash
+make all # stops, builds, sets up database and dependencies, runs and flushes redis
+```
 
 The application will be available at http://localhost:3000
 
@@ -351,6 +355,7 @@ By keeping the latest state via a `current` field we know what is the latest sta
 - Because of the points above, a full relation to delete-destroy records has not been implemented by now.
 - The scheduler is running every 5 minutes, but it could be improved to be more efficient.
 - The scheduler runs the first time after 1 second right after the service starts. This seemed a good approach to fetch data quickly and then continue with the 5 minutes interval.
+- The scheduler (`config/initializers/scheduler.rb`)is commented out by now so the development environment can rely on the seeds to populate the database.
 
 - The approach to cache data in Redis is based on this configuration:
 ```ruby
