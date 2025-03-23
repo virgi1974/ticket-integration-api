@@ -1,7 +1,7 @@
 .PHONY: build run stop restart logs test setup clean install-gems
 
 # Default target
-all: build run
+all: stop build setup run flush-redis
 
 # Build the Docker images
 build:
@@ -35,7 +35,11 @@ test:
 # Setup the database
 setup:
 	docker-compose run --rm app bundle install
-	docker-compose run --rm app rails db:create db:migrate db:seed
+	docker-compose run --rm app rails db:drop db:create db:migrate db:seed
+
+# Flush redis
+flush-redis:
+	docker-compose exec redis redis-cli -h localhost -p 6379 FLUSHALL
 
 # Clean up volumes and unused images
 clean:
