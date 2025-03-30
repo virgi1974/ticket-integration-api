@@ -12,8 +12,7 @@ gem "pg", "~> 1.1" # Use postgresql as the database for Active Record
 gem "puma", ">= 5.0" # Use the Puma web server [https://github.com/puma/puma]
 gem "rails", "~> 8.0.1"
 gem "rufus-scheduler", "~> 3.9" # Scheduler
-gem "solid_cache" # Use the database-backed adapters for Rails.cache and Active Job
-gem "solid_queue"
+# gem "solid_cache" # Use the database-backed adapters for Rails.cache and Active Job
 # Add HTTP asset caching/compression and X-Sendfile acceleration to Puma [https://github.com/basecamp/thruster/]
 gem "thruster", require: false
 gem "tzinfo-data", platforms: %i[ windows jruby ] # Windows does not include zoneinfo files
