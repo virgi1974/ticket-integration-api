@@ -10,6 +10,9 @@
 # Make sure RUBY_VERSION matches the Ruby version in .ruby-version
 FROM ruby:3.4.1-slim
 
+# Add this at the top, after FROM
+ARG RUBY_VERSION=3.4.1
+
 # Install dependencies
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y \
@@ -18,6 +21,8 @@ RUN apt-get update -qq && \
     nodejs \
     curl \
     git \
+    libjemalloc2 \
+    postgresql-client \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -34,4 +39,11 @@ RUN bundle install --jobs 4 --retry 3
 EXPOSE 3000
 
 # Configure the main process to run when running the image
-CMD ["rails", "server", "-b", "0.0.0.0"]
+ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+
+# Add a healthcheck
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/health || exit 1
+
+# Change the CMD to use production environment
+CMD ["rails", "server", "-b", "0.0.0.0", "-e", "production"]

@@ -79,16 +79,5 @@ test:
 # for a full overview on how database connection configuration can be specified.
 #
 production:
-  primary: &primary_production
-    <<: *default
-    database: virgilio_fernandez_production
-    username: virgilio_fernandez
-    password: <%= ENV["VIRGILIO_FERNANDEZ_DATABASE_PASSWORD"] %>
-  cache:
-    <<: *primary_production
-    database: virgilio_fernandez_production_cache
-    migrations_paths: db/cache_migrate
-  queue:
-    <<: *primary_production
-    database: virgilio_fernandez_production_queue
-    migrations_paths: db/queue_migrate
+  <<: *default
+  url: <%= ENV['DATABASE_URL'] %>

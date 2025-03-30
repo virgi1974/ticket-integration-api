@@ -92,6 +92,8 @@ GEM
       reline (>= 0.3.8)
     diff-lcs (1.6.0)
     docile (1.4.1)
+    dockerfile-rails (1.7.9)
+      rails (>= 3.0.0)
     dotenv (3.1.7)
     drb (2.2.1)
     dry-core (1.1.0)
@@ -391,6 +393,7 @@ DEPENDENCIES
   bootsnap
   brakeman
   debug
+  dockerfile-rails (>= 1.7)
   dry-matcher (~> 1.0)
   dry-monads (~> 1.6)
   dry-struct (~> 1.6)
