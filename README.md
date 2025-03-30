@@ -19,6 +19,7 @@
 - [Security](#security)
 - [Troubleshooting](#troubleshooting)
 - [Future Improvements](#future-improvements)
+- [Deployment](#deployment)
 
 ## 🚀 Project Overview
 This service provides a client integration in the context of an API ticketing system that:
@@ -519,3 +520,56 @@ If given more time, the next immediate step would be deploying this application 
 5. **Monitoring Integration**: Built-in metrics and observability
 
 The deployment would follow a blue-green strategy to ensure zero downtime, with automated database migrations and a CI/CD pipeline for continuous delivery. This approach would enable us to quickly validate the production performance optimizations outlined in the "Performance Benchmarking and Optimization" section.
+
+## Deployment
+
+The service is deployed on Fly.io. The production environment is ready and configured with PostgreSQL and Redis.
+
+### Prerequisites
+- [Install flyctl](https://fly.io/docs/hands-on/install-flyctl/)
+- Login to Fly.io: `fly auth login`
+
+### Key Commands
+
+```bash
+# Deploy the application
+fly deploy
+
+# Check app status
+fly status
+
+# View logs
+fly logs
+fly logs --all    # Include timestamps and all details
+
+# Scale application
+fly scale count 3  # Adjust number of machines
+
+# Access Production Database
+fly postgres connect -a virgilio-fernandez-db
+
+# Access Redis
+fly redis status -a patient-breeze-6225  # Check Redis status
+fly redis connect -a patient-breeze-6225  # Connect to Redis CLI
+
+# SSH into the application
+fly ssh console
+```
+
+### Environment Variables
+The following secrets are configured:
+- `DATABASE_URL`: PostgreSQL connection string
+- `REDIS_URL`: Redis connection string
+- `RAILS_MASTER_KEY`: Rails credentials key
+- `RAILS_ENV`: Set to 'production'
+
+To set new secrets:
+```bash
+fly secrets set KEY=VALUE
+```
+
+### Health Check
+The application provides a health endpoint at `/up` that verifies database connectivity.
+
+### Production URL
+The service is available at: `https://virgilio-fernandez.fly.dev`
