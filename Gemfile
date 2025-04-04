@@ -20,7 +20,7 @@ gem "jbuilder"
 gem "redis"
 
 # dry-rb gems
-gem "dry-monads", "~> 1.6"       # For Result/Try monads
+gem "dry-monads", "~> 1.8"       # For Result/Try monads
 gem "dry-matcher", "~> 1.0"      # For pattern matching on monads
 gem "dry-struct", "~> 1.6"       # For typed structs (useful for response objects)
 gem "dry-types", "~> 1.7"        # Required by dry-struct, useful for type coercions
