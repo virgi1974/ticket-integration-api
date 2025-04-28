@@ -32,7 +32,7 @@ group :development, :test do
   gem "pry", "~> 0.15.2"
   gem "rspec-rails", "~> 7.1" # Testing framework
   gem "rubocop-rails-omakase", require: false # Omakase Ruby styling
-  gem "shoulda-matchers", "~> 5.3" # Test matchers for models
+  gem "shoulda-matchers", "~> 6.5" # Test matchers for models
 end
 
 # Commented out gems kept for reference
