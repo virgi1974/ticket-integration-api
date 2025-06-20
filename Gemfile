@@ -30,7 +30,7 @@ group :development, :test do
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
   gem "factory_bot_rails", "~> 6.4" # Test data generation
   gem "pry", "~> 0.15.2"
-  gem "rspec-rails", "~> 7.1" # Testing framework
+  gem "rspec-rails", "~> 8.0" # Testing framework
   gem "rubocop-rails-omakase", require: false # Omakase Ruby styling
   gem "shoulda-matchers", "~> 5.3" # Test matchers for models
 end
