@@ -108,7 +108,7 @@ GEM
       zeitwerk (~> 2.6)
     dry-matcher (1.0.0)
       dry-core (~> 1.0, < 2)
-    dry-monads (1.8.2)
+    dry-monads (1.9.0)
       concurrent-ruby (~> 1.0)
       dry-core (~> 1.1)
       zeitwerk (~> 2.6)
@@ -378,7 +378,7 @@ GEM
       base64
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
-    zeitwerk (2.7.2)
+    zeitwerk (2.7.3)
 
 PLATFORMS
   aarch64-linux
@@ -397,7 +397,7 @@ DEPENDENCIES
   debug
   dockerfile-rails (>= 1.7)
   dry-matcher (~> 1.0)
-  dry-monads (~> 1.6)
+  dry-monads (~> 1.9)
   dry-struct (~> 1.6)
   dry-types (~> 1.7)
   factory_bot_rails (~> 6.4)
