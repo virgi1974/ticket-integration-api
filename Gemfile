@@ -28,7 +28,7 @@ gem "dry-types", "~> 1.7"        # Required by dry-struct, useful for type coerc
 group :development, :test do
   gem "brakeman", require: false # Static analysis for security vulnerabilities
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
-  gem "factory_bot_rails", "~> 6.4" # Test data generation
+  gem "factory_bot_rails", "~> 6.5" # Test data generation
   gem "pry", "~> 0.15.2"
   gem "rspec-rails", "~> 7.1" # Testing framework
   gem "rubocop-rails-omakase", require: false # Omakase Ruby styling
